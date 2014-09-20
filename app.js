@@ -21,6 +21,17 @@ app.post(
   '/sms',
   Users.is_user,
   Pairs.is_in_pair,
+  function(req, res, next) {
+    var from = req.body.From;
+    var body = req.body.Body;
+
+    if(/^pce$/i.test(body) || /^nahh$/i.test(body)) {
+      console.log('[SMS]'.blue, 'Received command:'.green, body.yellow);
+      Pairs.delete_pair(req,res);
+    } else {
+      next();
+    }
+  },
   function(req, res) {
     var from = req.body.From;
     var body = req.body.Body;
@@ -40,6 +51,7 @@ app.post(
     res.status(200).end();
   }
 );
+
 
 
 /*

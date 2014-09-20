@@ -87,7 +87,8 @@ exports.find_pair = function(req, res, callback) {
   });
 };
 
-exports.divorce_pair = function(divorcer, divorcee, res) {
+exports.divorce_user = function(req, res, divorcee) {
+  var divorcer = res.body.From;
   User.find({ $or: [{ number: divorcer }, { number: divorcee }]}, function(err, users) {
     if (err) {
       console.log('[User]'.blue, 'An error occured while trying to set numbers as paired.'.red);
@@ -100,7 +101,11 @@ exports.divorce_pair = function(divorcer, divorcee, res) {
         unactive_user = users[1];
         active_user = users[0];
       }
-      unactive_user.is_active = false;
+      if(/^nahh$/i.test(res.body.Body)) {
+        unactive_user.is_active = true;
+      } else if (/^pce$/i.test(res.body.Body)) {
+        unactive_user.is_active = false;
+      }
       unactive_user.is_paired = false;
       active_user.is_paired = false;
       unactive_user.save();
