@@ -52,7 +52,7 @@ addPair = function(l1, l2) {
             });
         }
     });
-}
+};
 
 exports.getPairNumber = function(number, callback){
     Pair.findOne({$or : [{alpha : number}, {omega : number}]}, function(err, pair){
@@ -83,7 +83,7 @@ exports.getPairNumber = function(number, callback){
             callback(false);
         }
     });
-}
+};
 
 exports.terminateUser = function(number) {
     Pair.findOne({$or: [{'alpha':number},{'omega':number}]}, function(err, pair) {
@@ -140,4 +140,4 @@ exports.terminateUser = function(number) {
             }
         }
     });
-}
+};
