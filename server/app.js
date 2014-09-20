@@ -7,10 +7,6 @@ var client = require('twilio')(constants.twilio_sid, constants.auth_token);
 var app = express();
 var port = 80;
 
-var CONNECT_COMMAND = "\connect";
-var DISCONNECT_COMMAND = "\disconnect";
-var CONNECT_SUCCESS = "Connected.";
-
 app.use(parser.urlencoded({
     extended: false
 }));
@@ -41,11 +37,12 @@ app.post('/sms', function(req, res){
 //                console.log('[ERR]'.red, err.red);
 //            }
 //        });
-        if (body == CONNECT_COMMAND) {
+        if (/^\connect$/.test(body)) {
             if (!isConnected(from)) {
+                console.log('[SMS]'.green, from.yellow, 'Connected.'.green);
                 newUser(number);
                 client.messages.create({
-                    body: CONNECT_SUCCESS,
+                    body: "Connected.",
                     to: from,
                     from: connstants.from_phone
                 }, function(err, message){
@@ -53,6 +50,7 @@ app.post('/sms', function(req, res){
                 });
             }
             else {
+                console.log('[SMS]'.green, from.yellow, 'Already connected.'.green);
                 client.messages.create({
                     body: "You are already connected",
                     to: from,
