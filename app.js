@@ -26,7 +26,7 @@ app.post(
     var body = req.body.Body;
     var to = req.body.To;
 
-    console.log('[SMS] From:'.green, from.yellow, 'Body:'.green, body.yellow, 'To:'.green, to.yellow);
+    console.log('[SMS]'.blue, 'From:'.green, from.yellow, 'Body:'.green, body.yellow, 'To:'.green, to.yellow);
     client.messages.create({
       body: body,
       to: to,
@@ -70,5 +70,5 @@ app.post('/sms', function(req, res){
 */
 
 // App
-console.log('[SERVER] Creating server on port'.green,  port.toString().yellow);
+console.log('[SERVER]'.blue, 'Creating server on port'.green,  port.toString().yellow);
 app.listen(port);
