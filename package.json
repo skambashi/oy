@@ -1,18 +1,26 @@
 {
   "name": "oy",
-  "version": "0.0.0",
-  "description": "Yo backwards",
+  "version": "1.0.0",
+  "description": "Yo backwards.",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "dependencies": {
-    "express": "4.4.0",
-    "mongodb": "1.4.5",
-    "mongoose": "3.8.12",
-    "twilio": "1.6.0",
-    "colors": "0.6.2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skambashi/oy.git"
   },
-  "contributors": [{"name": "Seikun Kambashi"}, {"name": "Calvin Nhieu"}],
-  "license": "MIT"
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/skambashi/oy/issues"
+  },
+  "homepage": "https://github.com/skambashi/oy",
+  "dependencies": {
+    "body-parser": "^1.8.3",
+    "colors": "^0.6.2",
+    "express": "^4.9.3",
+    "package.json": "^0.0.0"
+  },
+  "devDependencies": {}
 }

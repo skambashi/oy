@@ -1,16 +1,41 @@
 var express = require('express');
-var mongoose = require('mongoose');
 var colors = require('colors');
+var parser = require('body-parser');
+var constants = require('./../../constants');
+var client = require('twilio')(constants.twilio_sid, constants.auth_token);
 
 var app = express();
 var port = 80;
 
-app.psot('/sms', function(req, res){
+app.use(parser.urlencoded({
+    extended: false
+}));
 
-    var user_num = req.body.From;
+app.post('/sms', function(req, res){
+    var from = req.body.From;
     var body = req.body.Body;
-    console.log('[SMS] From:'.yellow, user_num.green, 'Body:'.yellow, body.green);
+    console.log('[SMS] From:'.green, from.yellow, 'Body:'.green, body.yellow);
+    if (/^pce$/i.test(body)){
+        console.log('[SMS]'.green, from.yellow, 'Stopped.'.red);
+    } else {
+        console.log('[SMS] Handle legit txts.'.green);
+        client.messages.create({
+            body: body,
+            to: from,
+            from: constants.from_phone
+        }, function(err, message){
+            if (err) {
+                console.log('[ERR]'.red, err.red);
+            }
+        });
+        // CHECK IF USER EXISTS IN CURRENT USER DB
+        // IF SO, TEXT BODY TO PAIR
+        // IF NOT, CHECK IF LONELY EXISTS
+        // IF SO, MATCH AND TEXT BODY TO PAIR
+        // IF NOT, STORE USER TO LONELY
+        // console.log('[SMS]'.green, from.yellow, 'Added.'.blue);
+    }
 });
 
-console.log('[SERVER] Creating server on port '.green,  port.toString().green);
+console.log('[SERVER] Creating server on port'.green,  port.toString().yellow);
 app.listen(port);
