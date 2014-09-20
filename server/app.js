@@ -56,15 +56,16 @@ addPair = function(l1, l2) {
     });
 }
 
-getPairNumber = function(number){
-    User.findOne({$or : [{alpha : number}, {omega : number}]}, function(err, pair){
+getPairNumber = function(number, callback){
+    Pair.findOne({$or : [{alpha : number}, {omega : number}]}, function(err, pair){
         if (err) {
             console.log(('[DB] Error while getting pair number:' + err).red);
+	    callback(false);
         } else if (pair) {
             if (number == pair.alpha) {
-                return pair.omega;
+                 callback(pair.omega);
             }
-            return pair.alpha;
+            callback(pair.alpha);
         } else {
             console.log('[DB] No user found.'.yellow);
             if (lonely == "") {
@@ -81,7 +82,7 @@ getPairNumber = function(number){
             } else {
                 addPair(number, lonely);
             }
-            return false;
+            callback(false);
         }
     });
 }
@@ -150,12 +151,13 @@ app.post('/sms', function(req, res){
     var body = req.body.Body;
     console.log('[SMS] From:'.green, from.yellow, 'Body:'.green, body.yellow);
     if (/^pce$/i.test(body)){
-		terminateUser(from);
+	terminateUser(from);
         console.log('[SMS]'.green, from.yellow, 'Stopped.'.red);
     } else {
-        var result = getPairNumber(from);
-        if (result) {
-        	client.messages.create({
+	console.log('getPairNumber:', from);
+        getPairNumber(from, function (result) {
+	    if (result) {
+                client.messages.create({
 	            body: body,
 	            to: result,
 	            from: constants.from_phone
@@ -164,7 +166,8 @@ app.post('/sms', function(req, res){
 	                console.log('[ERR]'.red, err.red);
 	            }
 	        });
-        }
+	    }
+	});
     }
 });
 
