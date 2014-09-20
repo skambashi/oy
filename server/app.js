@@ -17,6 +17,15 @@ app.post('/sms', function(req, res){
     console.log('[SMS] From:'.green, from.yellow, 'Body:'.green, body.yellow);
     if (/^pce$/i.test(body)){
         console.log('[SMS]'.green, from.yellow, 'Stopped.'.red);
+        client.messages.create({
+            body: 'Bye ~',
+            to: from,
+            from: constants.from_phone
+        }, function(err, message){
+            if (err) {
+                console.log('[ERR]'.red, err.red);
+            }
+        });
     } else {
         console.log('[SMS] Handle legit txts.'.green);
         client.messages.create({
