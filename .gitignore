@@ -4,3 +4,4 @@
 
 # npm stuffs
 /node_modules
+*.logs
