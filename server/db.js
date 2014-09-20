@@ -14,10 +14,10 @@ mongoose.connect(db_uri, function(err, res){
 var db = mongoose.connection;
 
 var pairSchema = new mongoose.Schema({
-    alpha: String,
-    omega: String
+    alpha: {type: String, required: true},
+    omega: {type: String, required: true}
 });
-var Pair = mongoose.model('Pair', pairSchema);
+var Pair = mongoose.model('Pairs', pairSchema);
 
 var lonely = "";
 
@@ -26,7 +26,7 @@ addPair = function(l1, l2) {
         'alpha': l1,
         'omega': l2
     });
-    pair.save(function(err, pair){
+    pair.save(function(err){
         if (err) {
             console.log(('[DB] Error when saving new pair: ' + err).red);
         } else {
@@ -49,6 +49,36 @@ addPair = function(l1, l2) {
                     console.log('[ERR]'.red, err.red);
                 }
             });
+        }
+    });
+}
+
+exports.getPairNumber = function(number){
+    User.findOne({$or [{alpha : number}, {omega : number}]}, function(err, pair){
+        if (err) {
+            console.log(('[DB] Error while getting pair number:' + err).red);
+        } else if (pair) {
+            if (number == pair.alpha) {
+                return pair.omega;
+            }
+            return pair.alpha;
+        } else {
+            console.log('[DB] No user found.'.yellow);
+            if (lonely == "") {
+                lonely = number;
+                client.messages.create({
+                    body: 'Matching...',
+                    to: number,
+                    from: constants.from_phone
+                }, function(err, message){
+                    if (err) {
+                        console.log('[ERR]'.red, err.red);
+                    }
+                });
+            } else {
+                addPair(number, lonely);
+            }
+            return false;
         }
     });
 }
@@ -100,34 +130,5 @@ exports.terminateUser = function(number) {
 		lonely = '';
 	    }
 	}
-    });
-}
-
-exports.getPairedNumber = function(number) {
-    Pair.findOne({$or: [{'alpha':number},{'omega':number}]}, function(err, pair) {
-        // New User
-        if (err) {
-	    console.log('GET PAIRED NUMBER ERR:', err);
-     	} else if (pair) {
-	    console.log('GET PAIRED NUMBER PAIR:', pair);
-            if (pair.alpha == number) {
-                return pair.omega;
-            }
-            return pair.alpha;
-        // New User
-        } else {
-	    console.log('GET PAIRED NUMBER NEW');
-	    // If no one to pair to, return false
-            if (lonely == "") {
-                lonely = number;
-                return false;
-            // Otherwise, return number of pair
-            } else {
-                addPair(lonely,number);
-                var temp = lonely;
-                lonely = "";
-                return temp;
-            }
-        }
     });
 }

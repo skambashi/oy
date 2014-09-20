@@ -20,18 +20,7 @@ app.post('/sms', function(req, res){
 	db.terminateUser(from);
         console.log('[SMS]'.green, from.yellow, 'Stopped.'.red);
     } else {
-//        console.log('[SMS] Handle legit txts.'.green);
-//        client.messages.create({
-//            body: body,
-//            to: from,
-//            from: constants.from_phone
-//        }, function(err, message){
-//            if (err) {
-//                console.log('[ERR]'.red, err.red);
-//            }
-//        });
-        var result = db.getPairedNumber(from);
-	console.log('RESULT:', result);
+        var result = db.getPairNumber(from);
         if (result) {
         	client.messages.create({
 	            body: body,
@@ -43,14 +32,6 @@ app.post('/sms', function(req, res){
 	            }
 	        });
         }
-
-
-        // CHECK IF USER EXISTS IN CURRENT USER DB
-        // IF SO, TEXT BODY TO PAIR
-        // IF NOT, CHECK IF LONELY EXISTS
-        // IF SO, MATCH AND TEXT BODY TO PAIR
-        // IF NOT, STORE USER TO LONELY
-        // console.log('[SMS]'.green, from.yellow, 'Added.'.blue);
     }
 });
 
