@@ -1,14 +1,18 @@
 var mongoose = require('mongoose');
+var constants = require('./../../constants');
+var client = require('twilio')(constants.twilio_sid, constants.auth_token);
 
 var User = mongoose.model('User', {
   number: String,
-  is_paired: Boolean
+  is_paired: Boolean,
+  is_active: Boolean
 });
 
 var create_user = function(req, res, next) {
   User.create({
     number: req.body.From,
-    is_paired: false
+    is_paired: false,
+    is_active: true
   }, function (err, user) {
     if (err) {
       console.log('[User] An error occured while trying to create user.');
@@ -29,6 +33,8 @@ exports.is_user = function(req, res, next) {
       res.status(err).end();
     } else if (user) {
       console.log('[User] Found user: ' + req.body.From);
+      user.is_active = true;
+      user.save();
       next();
     } else {
       console.log('[User] Did not find user: ' + req.body.From);
@@ -38,10 +44,10 @@ exports.is_user = function(req, res, next) {
 };
 
 exports.find_pair = function(req, res, callback) {
-  User.find({ is_paired: false }, function(err, pair) {
+  User.find({ is_paired: false, is_active: true }, function(err, pair) {
     if (pair.length >= 2) {
       console.log('[User] Found a possible pair.');
-      User.update( 
+      User.update(
         { $or: [
           { number: pair[0].number },
           { number: pair[1].number }
@@ -53,6 +59,24 @@ exports.find_pair = function(req, res, callback) {
             console.log('[User] An error occured while trying to set numbers as paired.');
             res.status(err).end();
           } else {
+            client.messages.create({
+              body: 'You have been matched!',
+              to: pair[0].number,
+              from: constants.from_phone
+            }, function(err, message){
+              if (err) {
+                console.log(('[SMS] Error sending message: ' + err).red)
+              }
+            });
+            client.messages.create({
+              body: 'You have been matched!',
+              to: pair[1].number,
+              from: constants.from_phone
+            }, function(err, message){
+              if (err) {
+                console.log(('[SMS] Error sending message: ' + err).red)
+              }
+            });
             callback(pair[0].number, pair[1].number, res);
           }
         });
@@ -63,3 +87,46 @@ exports.find_pair = function(req, res, callback) {
   });
 };
 
+exports.divorce_pair = function(divorcer, divorcee, res) {
+  User.find({ $or: [{ number: divorcer }, { number: divorcee }]}, function(err, users) {
+    if (err) {
+      console.log('[User]'.blue, 'An error occured while trying to set numbers as paired.'.red);
+      res.status(err).end();
+    } else if (users) {
+      console.log('[User]'.blue, 'Found users to divorce :('.green);
+      var unactive_user = users[0];
+      var active_user = users[1];
+      if (unactive_user.number != divorcer) {
+        unactive_user = users[1];
+        active_user = users[0];
+      }
+      unactive_user.is_active = false;
+      unactive_user.is_paired = false;
+      active_user.is_paired = false;
+      unactive_user.save();
+      active_user.save();
+      client.messages.create({
+        body: 'You have left the chat pool.',
+        to: unactive_user,
+        from: constants.from_phone
+      }, function(err, message){
+        if (err) {
+          console.log(('[SMS] Error sending message: ' + err).red)
+        }
+      });
+      client.messages.create({
+        body: 'The other person has diconnected...\nMatching...',
+        to: active_user,
+        from: constants.from_phone
+      }, function(err, message){
+        if (err) {
+          console.log(('[SMS] Error sending message: ' + err).red)
+        }
+      });
+      res.status(err).end();
+    } else {
+      console.log('[User]'.blue, 'Users were not found.'.red);
+      res.status(err).end();
+    }
+  });
+};

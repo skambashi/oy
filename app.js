@@ -27,6 +27,15 @@ app.post(
     var to = req.body.To;
 
     console.log('[SMS] From:'.green, from.yellow, 'Body:'.green, body.yellow, 'To:'.green, to.yellow);
+    client.messages.create({
+      body: body,
+      to: to,
+      from: constants.from_phone
+    }, function(err, message){
+      if (err) {
+        console.log(('[SMS] Error sending message: ' + err).red)
+      }
+    });
 
     res.status(200).end();
   }
