@@ -8,14 +8,13 @@ var client = require('twilio')(constants.twilio_sid, constants.auth_token);
 var app = express();
 var port = 80;
 
+// Configuration
+app.use(parser.urlencoded({ extended: false }));
+mongoose.connect('mongodb://localhost/oy');
+
 // Models
 var Users = require('./models/user.js');
 var Pairs = require('./models/pair.js');
-
-mongoose.connect('mongodb://localhost/oy');
-
-// Configuration
-app.use(parser.urlencoded({ extended: false }));
 
 // Routes
 app.post(
