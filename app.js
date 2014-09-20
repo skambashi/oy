@@ -1,18 +1,39 @@
+// Setup
 var express = require('express');
 var colors = require('colors');
+var mongoose = require('mongoose');
 var parser = require('body-parser');
-var constants = require('./../../constants');
+var constants = require('./../constants');
 var client = require('twilio')(constants.twilio_sid, constants.auth_token);
-
-var db = require('./db');
-
 var app = express();
 var port = 80;
 
-app.use(parser.urlencoded({
-    extended: false
-}));
+// Configuration
+app.use(parser.urlencoded({ extended: false }));
+mongoose.connect('mongodb://localhost/oy');
 
+// Models
+var Users = require('./models/user.js');
+var Pairs = require('./models/pair.js');
+
+// Routes
+app.post(
+  '/sms',
+  Users.is_user,
+  Pairs.is_in_pair,
+  function(req, res) {
+    var from = req.body.From;
+    var body = req.body.Body;
+    var to = req.body.To;
+
+    console.log('[SMS] From:'.green, from.yellow, 'Body:'.green, body.yellow, 'To:'.green, to.yellow);
+
+    res.status(200).end();
+  }
+);
+
+
+/*
 app.post('/sms', function(req, res){
     var from = req.body.From;
     var body = req.body.Body;
@@ -37,6 +58,8 @@ app.post('/sms', function(req, res){
 		});
     }
 });
+*/
 
+// App
 console.log('[SERVER] Creating server on port'.green,  port.toString().yellow);
 app.listen(port);
