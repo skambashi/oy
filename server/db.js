@@ -54,7 +54,7 @@ addPair = function(l1, l2) {
 }
 
 exports.getPairNumber = function(number){
-    User.findOne({$or [{alpha : number}, {omega : number}]}, function(err, pair){
+    User.findOne({$or : [{alpha : number}, {omega : number}]}, function(err, pair){
         if (err) {
             console.log(('[DB] Error while getting pair number:' + err).red);
         } else if (pair) {
