@@ -1,5 +1,6 @@
 # Mac stuffs
 .DS_Store
+*.swp
 
 # npm stuffs
 /node_modules
