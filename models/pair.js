@@ -66,6 +66,11 @@ exports.delete_pair = function(number) {
         res.status(200).end();
       } else {
         console.log('[Pair] Successfully deleted pair with number: ' + number);
+        var divorcee = result.number_a;
+        if (number == divorcee) {
+          divorcee = result.number_b;
+        }
+        Users.divorce_pair(number, divorcee, res);
         res.status(200).end();
       }
   });
