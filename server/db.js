@@ -57,32 +57,49 @@ exports.terminateUser = function(number) {
     Pair.findOne({$or: [{'alpha':number},{'omega':number}]}, function(err, pair) {
         // User not found
         if (err) {
-            if (lonely == number) {
-                lonely = '';
-            }
+	    console.log('TERMINATE USER ERR:', err);
         // Else, returning user
-        } else {
+        } else if (pair) {
+	    console.log('TERMINATE USER:', number);
             var left_over;
+	    var to_remove;
             if (pair.alpha == number) {
                 left_over = pair.omega;
-            }
-            left_over = pair.alpha;
-            pair.remove();
+		to_remove = pair.alpha;
+            } else {
+                left_over = pair.alpha;
+		to_remove = pair.omega;
+	    }
             client.messages.create({
                 body: 'The other person has disconnected...\nMatching...',
-                to: from,
+                to: left_over,
                 from: constants.from_phone
             }, function(err, message){
                 if (err) {
                     console.log('[ERR]'.red, err.red);
                 }
             });
+	    client.messages.create({
+                body: 'Diconnected.',
+                to: to_remove,
+                from: constants.from_phone
+            }, function(err, message){
+                if (err) {
+                    console.log('[ERR]'.red, err.red);
+                }
+            });
+            pair.remove();
             if (lonely == ''){
                 lonely = left_over;
             } else {
                 addPair(lonely, left_over);
             }
-        }
+	// Pair not found
+        } else {
+	    if (lonely == number) {
+		lonely = '';
+	    }
+	}
     });
 }
 
@@ -90,7 +107,17 @@ exports.getPairedNumber = function(number) {
     Pair.findOne({$or: [{'alpha':number},{'omega':number}]}, function(err, pair) {
         // New User
         if (err) {
-            // If no one to pair to, return false
+	    console.log('GET PAIRED NUMBER ERR:', err);
+     	} else if (pair) {
+	    console.log('GET PAIRED NUMBER PAIR:', pair);
+            if (pair.alpha == number) {
+                return pair.omega;
+            }
+            return pair.alpha;
+        // New User
+        } else {
+	    console.log('GET PAIRED NUMBER NEW');
+	    // If no one to pair to, return false
             if (lonely == "") {
                 lonely = number;
                 return false;
@@ -101,12 +128,6 @@ exports.getPairedNumber = function(number) {
                 lonely = "";
                 return temp;
             }
-        // Else, returning user
-        } else {
-            if (pair.alpha == number) {
-                return pair.omega;
-            }
-            return pair.alpha;
         }
     });
 }

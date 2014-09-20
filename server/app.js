@@ -17,16 +17,8 @@ app.post('/sms', function(req, res){
     var body = req.body.Body;
     console.log('[SMS] From:'.green, from.yellow, 'Body:'.green, body.yellow);
     if (/^pce$/i.test(body)){
+	db.terminateUser(from);
         console.log('[SMS]'.green, from.yellow, 'Stopped.'.red);
-        client.messages.create({
-            body: 'Bye ~',
-            to: from,
-            from: constants.from_phone
-        }, function(err, message){
-            if (err) {
-                console.log('[ERR]'.red, err.red);
-            }
-        });
     } else {
 //        console.log('[SMS] Handle legit txts.'.green);
 //        client.messages.create({
@@ -39,6 +31,7 @@ app.post('/sms', function(req, res){
 //            }
 //        });
         var result = db.getPairedNumber(from);
+	console.log('RESULT:', result);
         if (result) {
         	client.messages.create({
 	            body: body,
