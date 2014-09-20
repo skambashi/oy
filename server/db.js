@@ -51,7 +51,7 @@ isPaired = function(number) {
     });
 }
 
-export.newUser = function(number) {
+exports.newUser = function(number) {
     if (isConnected(number)){
         console.error('Invalid use. Not a new user.');
         return;
@@ -63,7 +63,7 @@ export.newUser = function(number) {
     }
 }
 
-export.reconnectUser = function(number) {
+exports.reconnectUser = function(number) {
     if (isPaired(number)) {
         var toLonely = getPairedNumber(number);
         getPair().remove();
@@ -79,7 +79,7 @@ getPair = function (number) {
     });
 }
 
-export terminateUser = function(number) {
+exports.terminateUser = function(number) {
     if (number==lonely) {
         lonely = "";
         return;
@@ -88,7 +88,7 @@ export terminateUser = function(number) {
     else console.error("Invalid use. Number is not recognized.");
 }
 
-export.getPairedNumber = function(number) {
+exports.getPairedNumber = function(number) {
     if(isPaired(number)) {
         return getPair(number);
     }
