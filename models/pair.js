@@ -28,8 +28,8 @@ var create_pair = function(number_a, number_b, res) {
 
 exports.is_in_pair = function(req, res, next) {
   Pair.findOne(
-    { $or: [ 
-      { number_a: req.body.From, is_deleted: false }, 
+    { $or: [
+      { number_a: req.body.From, is_deleted: false },
       { number_b: req.body.From, is_deleted: false }
     ] },
     function(err, pair) {
@@ -47,31 +47,30 @@ exports.is_in_pair = function(req, res, next) {
           next();
         }
       } else {
-        console.log('[PAIR]'.blue, 'Number'.green, req.body.From.yellow, 'is not in a pair.'.green); 
+        console.log('[PAIR]'.blue, 'Number'.green, req.body.From.yellow, 'is not in a pair.'.green);
         Users.find_pair(req, res, create_pair);
       }
   });
 };
 
-exports.delete_pair = function(number) {
-  User.update( 
-    { $or: [ 
-      { number_a: number, is_deleted: false }, 
-      { number_b: number, is_deleted: false }
+exports.delete_pair = function(req, res) {
+  User.update(
+    { $or: [
+      { number_a: req.body.From, is_deleted: false },
+      { number_b: req.body.From, is_deleted: false }
     ] },
     { $set: { is_deleted: true } },
     function(err, result) {
       if (err) {
-        console.log(('[PAIR] Failed to delete pair with number: ' + number + '.' + err)).red;
+        console.log(('[PAIR] Failed to delete pair with number: ' + req.body.From + '.' + err)).red;
         res.status(200).end();
       } else {
-        console.log('[PAIR]'.blue, 'Successfully deleted pair with number:'.green, number.yellow);
+        console.log('[PAIR]'.blue, 'Successfully deleted pair with number:'.green, req.body.From.yellow);
         var divorcee = result.number_a;
-        if (number == divorcee) {
+        if (req.body.From == divorcee) {
           divorcee = result.number_b;
         }
-        Users.divorce_pair(number, divorcee, res);
-        res.status(200).end();
+        Users.divorce_user(req, res, divorcee);
       }
   });
-}
+};
