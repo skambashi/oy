@@ -38,28 +38,17 @@ app.post('/sms', function(req, res){
 //                console.log('[ERR]'.red, err.red);
 //            }
 //        });
-        if (/^oy$/i.test(body)) {
-            if (!db.isConnected(from)) {
-                console.log('[SMS]'.green, from.yellow, 'Connected.'.green);
-                db.newUser(from);
-                client.messages.create({
-                    body: "Connected.",
-                    to: from,
-                    from: connstants.from_phone
-                }, function(err, message){
-                    if (err) console.log('[ERR]'.red, err.red);
-                });
-            }
-            else {
-                console.log('[SMS]'.green, from.yellow, 'Already connected.'.green);
-                client.messages.create({
-                    body: "You are already connected",
-                    to: from,
-                    from: connstants.from_phone
-                }, function(err, message){
-                    if (err) console.log('[ERR]'.red, err.red);
-                });
-            }
+        var result = db.getPairedNumber(from);
+        if (result) {
+        	client.messages.create({
+	            body: body,
+	            to: result,
+	            from: constants.from_phone
+	        }, function(err, message){
+	            if (err) {
+	                console.log('[ERR]'.red, err.red);
+	            }
+	        });
         }
 
 

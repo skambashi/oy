@@ -53,58 +53,60 @@ addPair = function(l1, l2) {
     });
 }
 
-isConnected = function(number) {
-    if (number == lonely) return true;
-    else {
-        Pair.find(function(err, pairs){
-            if (err) return console.error(err);
-            console.dir(pairs);
-            for (pair in pairs) {
-                if(pair.alpha == number || pair.omega == number) return true;
-            }
-        });
-        return false;
-    }
-}
-
-exports.isPaired = function(number) {
-    Pair.findOne({$or: [{'alpha':number},{'omega':number}]}, function(err, pair) {
-        if (err) return false;
-        return true;
-    });
-}
-
-exports.newUser = function(number) {
-    if (lonely == "") {
-        lonely = number;
-    }
-    else {
-        addPair(lonely,number);
-        lonely = "";
-    }
-}
-
-exports.reconnectUser = function(number) {
-    if (isPaired(number)) {
-        var toLonely = getPairedNumber(number);
-        getPair().remove();
-        newUser(toLonely);
-    }
-    else console.error('Invalid use. Number does not have a pair.');
-}
-
 exports.terminateUser = function(number) {
-    if (number==lonely) {
-        lonely = "";
-        return;
-    }
-    else if (isConnected(number)) reconnectUser(number);
-    else console.error("Invalid use. Number is not recognized.");
+    Pair.findOne({$or: [{'alpha':number},{'omega':number}]}, function(err, pair) {
+        // User not found
+        if (err) {
+            if (lonely == number) {
+                lonely = '';
+            }
+        // Else, returning user
+        } else {
+            var left_over;
+            if (pair.alpha == number) {
+                left_over = pair.omega;
+            }
+            left_over = pair.alpha;
+            pair.remove();
+            client.messages.create({
+                body: 'The other person has disconnected...\nMatching...',
+                to: from,
+                from: constants.from_phone
+            }, function(err, message){
+                if (err) {
+                    console.log('[ERR]'.red, err.red);
+                }
+            });
+            if (lonely == ''){
+                lonely = left_over;
+            } else {
+                addPair(lonely, left_over);
+            }
+        }
+    });
 }
 
 exports.getPairedNumber = function(number) {
     Pair.findOne({$or: [{'alpha':number},{'omega':number}]}, function(err, pair) {
-        if (err) return console.error("Invalid use. Number does not have a pair.");
-        return pair;
+        // New User
+        if (err) {
+            // If no one to pair to, return false
+            if (lonely == "") {
+                lonely = number;
+                return false;
+            // Otherwise, return number of pair
+            } else {
+                addPair(lonely,number);
+                var temp = lonely;
+                lonely = "";
+                return temp;
+            }
+        // Else, returning user
+        } else {
+            if (pair.alpha == number) {
+                return pair.omega;
+            }
+            return pair.alpha;
+        }
     });
 }
