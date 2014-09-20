@@ -3,6 +3,7 @@ var colors = require('colors');
 var parser = require('body-parser');
 var constants = require('./../../constants');
 var client = require('twilio')(constants.twilio_sid, constants.auth_token);
+var db = requrie('./db');
 
 var app = express();
 var port = 80;
@@ -37,8 +38,8 @@ app.post('/sms', function(req, res){
 //                console.log('[ERR]'.red, err.red);
 //            }
 //        });
-        if (/^\connect$/.test(body)) {
-            if (!isConnected(from)) {
+        if (/^\\connect$/.test(body)) {
+            if (!db.isConnected(from)) {
                 console.log('[SMS]'.green, from.yellow, 'Connected.'.green);
                 newUser(number);
                 client.messages.create({

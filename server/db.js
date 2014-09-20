@@ -5,7 +5,7 @@ mongoose.connect(db_uri, function(err, res){
     if (err) {
         console.log(('[DB] Error connecting to: ' + uristring + '. ' + err).red);
     } else {
-        console.log(('[DB] Error connecting to: ' + uristring + '. ' + err).yellow);
+        console.log(('[DB] Successfully connected to: ' + uristring + '. ' + err).yellow);
     }
 });
 
