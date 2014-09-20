@@ -1,16 +1,23 @@
+var colors = require('colors');
 var mongoose = require('mongoose');
+var db_uri = 'mongodb://localhost/oy';
+mongoose.connect(db_uri, function(err, res){
+    if (err) {
+        console.log(('[DB] Error connecting to: ' + uristring + '. ' + err).red);
+    } else {
+        console.log(('[DB] Error connecting to: ' + uristring + '. ' + err).yellow);
+    }
+});
+
 var db = mongoose.connection;
 
-var lonely = "";
-
-db.on('error', console.error);
-db.once('open', function() {
-    var pairSchema = new mongoose.Schema({
-        alpha: String,
-        omega: String
-    });
-    var Pair = mongoose.model('Pair', pairSchema);
+var pairSchema = new mongoose.Schema({
+    alpha: String,
+    omega: String
 });
+var Pair = mongoose.model('Pair', pairSchema);
+
+var lonely = "";
 
 addPair = function(l1, l2) {
     var pair = new Pair({
@@ -23,7 +30,7 @@ addPair = function(l1, l2) {
     });
 }
 
-export.isConnected = function(number) {
+exports.isConnected = function(number) {
     if (number == lonely) return true;
     else {
         Pair.find(function(err, pairs){
@@ -87,5 +94,3 @@ export.getPairedNumber = function(number) {
     }
     else return console.error("Invalid use. Number does not have a pair.");
 }
-
-mongoose.connect('mongodb://localhost/oy');
