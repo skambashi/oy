@@ -15,10 +15,10 @@ var create_user = function(req, res, next) {
     is_active: true
   }, function (err, user) {
     if (err) {
-      console.log('[User] An error occured while trying to create user.');
+      console.log('[USER] An error occured while trying to create user.'.red);
       res.status(err).end();
     } else {
-      console.log('[User] Added new user: ' + req.body.From + '.');
+      console.log('[USER]'.blue, 'Added new user:'.green, req.body.From.yellow + '.'.green);
       next();
     }
   });
@@ -29,15 +29,15 @@ exports.is_user = function(req, res, next) {
     number: req.body.From
   }, function(err, user) {
     if (err) {
-      console.log('[User] An error occured while looking for user: ' + req.body.From);
+      console.log(('[USER] An error occured while looking for user: ' + req.body.From)).red;
       res.status(err).end();
     } else if (user) {
-      console.log('[User] Found user: ' + req.body.From);
+      console.log('[USER]'.blue, 'Found user:'.green, req.body.From.yellow);
       user.is_active = true;
       user.save();
       next();
     } else {
-      console.log('[User] Did not find user: ' + req.body.From);
+      console.log('[USER]'.blue, 'Did not find user:'.green, req.body.From.yellow);
       create_user(req, res, next);
     }
   });
@@ -46,7 +46,7 @@ exports.is_user = function(req, res, next) {
 exports.find_pair = function(req, res, callback) {
   User.find({ is_paired: false, is_active: true }, function(err, pair) {
     if (pair.length >= 2) {
-      console.log('[User] Found a possible pair.');
+      console.log('[USER]'.blue, 'Found a possible pair.'.green);
       User.update(
         { $or: [
           { number: pair[0].number },
@@ -56,7 +56,7 @@ exports.find_pair = function(req, res, callback) {
         { multi: true },
         function(err, result) {
           if (err) {
-            console.log('[User] An error occured while trying to set numbers as paired.');
+            console.log('[USER] An error occured while trying to set numbers as paired.'.red);
             res.status(err).end();
           } else {
             client.messages.create({
@@ -81,7 +81,7 @@ exports.find_pair = function(req, res, callback) {
           }
         });
     } else {
-      console.log('[User] Could not create a pair, not enough singles.');
+      console.log('[USER]'.blue, 'Could not create a pair, not enough singles.'.green);
       res.status(200).end();
     }
   });

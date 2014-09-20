@@ -14,13 +14,13 @@ var create_pair = function(number_a, number_b, res) {
     is_deleted: false
   }, function (err, pair) {
     if (err) {
-      console.log('[Pair] An error occured while trying to create a pair.');
+      console.log(('[PAIR] An error occured while trying to create a pair.')).red;
       res.status(err).end();
     } else if (pair) {
-      console.log('[Pair] Successfully paired users: ' + number_a + ' and ' + number_b  + '.');
+      console.log('[PAIR]'.blue, 'Successfully paired users:'.green, number_a.yellow, 'and'.green, number_b.yellow + '.'.green);
       res.status(200).end();
     } else {
-      console.log('[Pair] Failed to create a pair with numbers: ' + number_a + ' and ' + number_b + '.');
+      console.log('[PAIR]'.blue, 'Failed to create a pair with numbers:'.green, number_a.yellow, 'and', number_b.yellow + '.'.green);
       res.status(200).end();
     }
   });
@@ -34,10 +34,10 @@ exports.is_in_pair = function(req, res, next) {
     ] },
     function(err, pair) {
       if (err) {
-        console.log('[Pair] An error occured while looking for pair.');
+        console.log(('[PAIR] An error occured while looking for pair.')).red;
         res.status(err).end();
       } else if (pair) {
-        console.log('[Pair] Found ' + req.body.From + ' in a pair.');
+        console.log('[PAIR]'.blue, 'Found'.green, req.body.From.yellow, 'in a pair.'.green);
 
         if (pair.number_a == req.body.From) {
           req.body.To = pair.number_b;
@@ -47,7 +47,7 @@ exports.is_in_pair = function(req, res, next) {
           next();
         }
       } else {
-        console.log('[Pair] Number ' + req.body.From + ' is not in a pair.'); 
+        console.log('[PAIR]'.blue, 'Number'.green, req.body.From.yellow, 'is not in a pair.'.green); 
         Users.find_pair(req, res, create_pair);
       }
   });
@@ -62,10 +62,10 @@ exports.delete_pair = function(number) {
     { $set: { is_deleted: true } },
     function(err, result) {
       if (err) {
-        console.log('[Pair] Failed to delete pair with number: ' + number + '.' + err);
+        console.log(('[PAIR] Failed to delete pair with number: ' + number + '.' + err)).red;
         res.status(200).end();
       } else {
-        console.log('[Pair] Successfully deleted pair with number: ' + number);
+        console.log('[PAIR]'.blue, 'Successfully deleted pair with number:'.green, number.yellow);
         var divorcee = result.number_a;
         if (number == divorcee) {
           divorcee = result.number_b;
