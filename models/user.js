@@ -74,8 +74,8 @@ exports.find_pair = function(req, res, callback) {
             res.status(err).end();
           } else {
             client.messages.create({
-              body: 'You have been matched!\nType \'nahh\' to text someone else.\nText \'pce\' to stop.',
-              to: pair[0].number,
+              body: 'You have been matched!\nText \'nahh\' to switch people.\nText \'pce\' to stop.',
+              to: user_one.number,
               from: constants.from_phone
             }, function(err, message){
               if (err) {
@@ -84,14 +84,14 @@ exports.find_pair = function(req, res, callback) {
             });
             client.messages.create({
               body: 'You have been matched!\nText \'nahh\' to switch people.\nText \'pce\' to stop.',
-              to: pair[1].number,
+              to: user_two.number,
               from: constants.from_phone
             }, function(err, message){
               if (err) {
                 console.log(('[SMS] Error sending message: ' + err).red);
               }
             });
-            callback(pair[0].number, pair[1].number, res);
+            callback(user_one.number, user_two.number, res);
           }
         });
     } else {
