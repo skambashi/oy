@@ -14,6 +14,7 @@ app.use(parser.urlencoded({ extended: false }));
 mongoose.connect('mongodb://localhost/oy');
 
 // Models
+var Messages = require('./models/messages.js');
 var Users = require('./models/user.js');
 var Pairs = require('./models/pair.js');
 
@@ -39,15 +40,11 @@ app.post(
     }
   },
   function(req, res) {
-    var from = req.body.From;
-    var body = req.body.Body;
     var to = req.body.To;
+    var from = req.body.From;
+    var message = req.body.Body;
 
-    debug.print(
-      debug.type.info,
-      'SMS',
-      'From: '.green + from.yellow + ' To: '.green + to.yellow + ' Body: '.green + body.yellow
-    );
+    Messages.add_message(to, from, message);
 
     client.messages.create({
       body: body,
