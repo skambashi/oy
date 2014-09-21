@@ -129,7 +129,7 @@ exports.divorce_user = function(req, res, divorcee) {
           to: unactive_user.number,
           from: constants.from_phone,
           body: 'Rematching...'
-        }), function(err, message){
+        }, function(err, message){
           if (err) {
             console.log(('[SMS] Error sending message: ' + err).red);
           }
@@ -139,7 +139,7 @@ exports.divorce_user = function(req, res, divorcee) {
           to: unactive_user.number,
           from: constants.from_phone,
           body: 'You have left the chat pool.'
-        }), function(err, message){
+        }, function(err, message){
           if (err) {
             console.log(('[SMS] Error sending message: ' + err).red);
           }
@@ -149,7 +149,7 @@ exports.divorce_user = function(req, res, divorcee) {
         to: active_user.number,
         from: constants.from_phone,
         body: 'The other person has diconnected...\nMatching...'
-      }), function(err, message){
+      }, function(err, message){
         if (err) {
           console.log(('[SMS] Error sending message: ' + err).red);
         }
