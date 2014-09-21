@@ -29,7 +29,7 @@ exports.is_user = function(req, res, next) {
     number: req.body.From
   }, function(err, user) {
     if (err) {
-      console.log(('[USER] An error occured while looking for user: ' + req.body.From)).red;
+      console.log(('[USER] An error occured while looking for user: ' + req.body.From).red);
       res.status(err).end();
     } else if (user) {
       console.log('[USER]'.blue, 'Found user:'.green, req.body.From.yellow);
@@ -60,7 +60,7 @@ exports.find_pair = function(req, res, callback) {
             res.status(err).end();
           } else {
             client.messages.create({
-              body: 'You have been matched!',
+              body: 'You have been matched! Type \'nahh\' to text someone else. Text \'pce\' to stop texts until the next time you text.',
               to: pair[0].number,
               from: constants.from_phone
             }, function(err, message){
@@ -69,7 +69,7 @@ exports.find_pair = function(req, res, callback) {
               }
             });
             client.messages.create({
-              body: 'You have been matched!',
+              body: 'You have been matched! Type \'nahh\' to text someone else. Text \'pce\' to stop texts until the next time you text.',
               to: pair[1].number,
               from: constants.from_phone
             }, function(err, message){
@@ -88,50 +88,43 @@ exports.find_pair = function(req, res, callback) {
 };
 
 exports.divorce_user = function(req, res, divorcee) {
-  var divorcer = res.body.From;
+  var divorcer = req.body.From;
   User.find({ $or: [{ number: divorcer }, { number: divorcee }]}, function(err, users) {
     if (err) {
       console.log('[User]'.blue, 'An error occured while trying to set numbers as paired.'.red);
       res.status(err).end();
     } else if (users) {
-      console.log('[User]'.blue, 'Found users to divorce :('.green);
+      console.log('[User]'.blue, 'Found users to divorce.'.green);
       var unactive_user = users[0];
       var active_user = users[1];
       if (unactive_user.number != divorcer) {
         unactive_user = users[1];
         active_user = users[0];
       }
-      if(/^nahh$/i.test(res.body.Body)) {
+      if (/^nahh$/i.test(req.body.Body)) {
         unactive_user.is_active = true;
-      } else if (/^pce$/i.test(res.body.Body)) {
+      } else if (/^pce$/i.test(req.body.Body)) {
         unactive_user.is_active = false;
       }
       unactive_user.is_paired = false;
       active_user.is_paired = false;
       unactive_user.save();
       active_user.save();
+
       client.messages.create({
-        body: 'You have left the chat pool.',
-        to: unactive_user,
-        from: constants.from_phone
-      }, function(err, message){
-        if (err) {
-          console.log(('[SMS] Error sending message: ' + err).red)
-        }
+        to: unactive_user.number,
+        from: constants.from_phone,
+        body: 'You have left the chat pool.'
       });
       client.messages.create({
-        body: 'The other person has diconnected...\nMatching...',
-        to: active_user,
-        from: constants.from_phone
-      }, function(err, message){
-        if (err) {
-          console.log(('[SMS] Error sending message: ' + err).red)
-        }
+        to: active_user.number,
+        from: constants.from_phone,
+        body: 'The other person has diconnected...\nMatching...'
       });
-      res.status(err).end();
+      res.status(200).end();
     } else {
       console.log('[User]'.blue, 'Users were not found.'.red);
-      res.status(err).end();
+      res.status(200).end();
     }
   });
 };

@@ -26,7 +26,7 @@ app.post(
     var body = req.body.Body;
 
     if(/^pce$/i.test(body) || /^nahh$/i.test(body)) {
-      console.log('[SMS]'.blue, 'Received command:'.green, body.yellow);
+      console.log('[SMS]'.blue, 'Received command:'.green, body.yellow, 'From:'.green, from.yellow);
       Pairs.delete_pair(req,res);
     } else {
       next();

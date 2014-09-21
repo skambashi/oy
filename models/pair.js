@@ -14,7 +14,7 @@ var create_pair = function(number_a, number_b, res) {
     is_deleted: false
   }, function (err, pair) {
     if (err) {
-      console.log(('[PAIR] An error occured while trying to create a pair.')).red;
+      console.log(('[PAIR] An error occured while trying to create a pair.').red);
       res.status(err).end();
     } else if (pair) {
       console.log('[PAIR]'.blue, 'Successfully paired users:'.green, number_a.yellow, 'and'.green, number_b.yellow + '.'.green);
@@ -34,7 +34,7 @@ exports.is_in_pair = function(req, res, next) {
     ] },
     function(err, pair) {
       if (err) {
-        console.log(('[PAIR] An error occured while looking for pair.')).red;
+        console.log(('[PAIR] An error occured while looking for pair.').red);
         res.status(err).end();
       } else if (pair) {
         console.log('[PAIR]'.blue, 'Found'.green, req.body.From.yellow, 'in a pair.'.green);
@@ -54,21 +54,22 @@ exports.is_in_pair = function(req, res, next) {
 };
 
 exports.delete_pair = function(req, res) {
-  User.update(
+  Pair.findOne(
     { $or: [
       { number_a: req.body.From, is_deleted: false },
       { number_b: req.body.From, is_deleted: false }
     ] },
-    { $set: { is_deleted: true } },
-    function(err, result) {
+    function(err, pair) {
       if (err) {
-        console.log(('[PAIR] Failed to delete pair with number: ' + req.body.From + '.' + err)).red;
-        res.status(200).end();
-      } else {
+        console.log(('[PAIR] Failed to delete pair with number: ' + req.body.From + '.' + err).red);
+        res.status(err).end();
+      } else if (pair) {
         console.log('[PAIR]'.blue, 'Successfully deleted pair with number:'.green, req.body.From.yellow);
-        var divorcee = result.number_a;
+        pair.is_deleted = true;
+        pair.save();
+        var divorcee = pair.number_a;
         if (req.body.From == divorcee) {
-          divorcee = result.number_b;
+          divorcee = pair.number_b;
         }
         Users.divorce_user(req, res, divorcee);
       }
