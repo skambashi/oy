@@ -5,6 +5,8 @@ var debug = require('./../helpers/debug');
 var Pair = mongoose.model('Pair', {
   number_a: String,
   number_b: String,
+  created_on: Date,
+  deleted_on: Date,
   is_deleted: Boolean
 });
 
@@ -12,6 +14,7 @@ var create_pair = function(number_a, number_b, res) {
   Pair.create({
     number_a: number_a,
     number_b: number_b,
+    created_on: (new Date()),
     is_deleted: false
   }, function (err, pair) {
     if (err) {
@@ -100,6 +103,7 @@ exports.delete_pair = function(req, res) {
 
         res.status(err).end();
       } else if (pair) {
+        pair.deleted_on = (new Date());
         pair.is_deleted = true;
         pair.save();
 

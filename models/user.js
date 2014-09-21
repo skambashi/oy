@@ -6,14 +6,18 @@ var debug = require('./../helpers/debug');
 var User = mongoose.model('User', {
   number: String,
   is_paired: Boolean,
-  is_active: Boolean
+  is_active: Boolean,
+  created_on: Date,
+  last_active: Date
 });
 
 var create_user = function(req, res, next) {
   User.create({
     number: req.body.From,
     is_paired: false,
-    is_active: true
+    is_active: true,
+    created_on: (new Date()),
+    last_active: (new Date())
   }, function (err, user) {
     if (err) {
       debug.print(
@@ -103,7 +107,7 @@ exports.find_pair = function(req, res, callback) {
           { number: user_one.number },
           { number: user_two.number }
         ] },
-        { $set: { is_paired: true } },
+        { $set: { is_paired: true, last_active: (new Date()) } },
         { multi: true },
         function(err, result) {
           if (err) {
@@ -190,6 +194,8 @@ exports.divorce_user = function(req, res, divorcee) {
 
       unactive_user.is_paired = false;
       active_user.is_paired = false;
+      unactive_user.last_active = (new Date());
+      active_user.last_active = (new Date());
       unactive_user.save();
       active_user.save();
 
