@@ -19,6 +19,15 @@ var create_user = function(req, res, next) {
       res.status(err).end();
     } else {
       console.log('[USER]'.blue, 'Added new user:'.green, req.body.From.yellow + '.'.green);
+      client.messages.create({
+        body: 'Welcome to Oy!',
+        to: req.body.From,
+        from: constants.from_phone
+      }, function(err, message){
+        if (err) {
+          console.log(('[SMS] Error sending message: ' + err).red)
+        }
+      });
       next();
     }
   });
@@ -47,10 +56,15 @@ exports.find_pair = function(req, res, callback) {
   User.find({ is_paired: false, is_active: true }, function(err, pair) {
     if (pair.length >= 2) {
       console.log('[USER]'.blue, 'Found a possible pair.'.green);
+      user_one = pair[Math.floor(Math.random()*pair.length)];
+      user_two = pair[Math.floor(Math.random()*pair.length)];
+      while (user_one == user_two) {
+        user_one = pair[Math.floor(Math.random()*pair.length)];
+      }
       User.update(
         { $or: [
-          { number: pair[0].number },
-          { number: pair[1].number }
+          { number: user_one.number },
+          { number: user_two.number }
         ] },
         { $set: { is_paired: true } },
         { multi: true },
@@ -60,21 +74,21 @@ exports.find_pair = function(req, res, callback) {
             res.status(err).end();
           } else {
             client.messages.create({
-              body: 'You have been matched! Type \'nahh\' to text someone else. Text \'pce\' to stop texts until the next time you text.',
+              body: 'You have been matched!\nType \'nahh\' to text someone else.\nText \'pce\' to stop.',
               to: pair[0].number,
               from: constants.from_phone
             }, function(err, message){
               if (err) {
-                console.log(('[SMS] Error sending message: ' + err).red)
+                console.log(('[SMS] Error sending message: ' + err).red);
               }
             });
             client.messages.create({
-              body: 'You have been matched! Type \'nahh\' to text someone else. Text \'pce\' to stop texts until the next time you text.',
+              body: 'You have been matched!\nText \'nahh\' to switch people.\nText \'pce\' to stop.',
               to: pair[1].number,
               from: constants.from_phone
             }, function(err, message){
               if (err) {
-                console.log(('[SMS] Error sending message: ' + err).red)
+                console.log(('[SMS] Error sending message: ' + err).red);
               }
             });
             callback(pair[0].number, pair[1].number, res);
@@ -110,16 +124,35 @@ exports.divorce_user = function(req, res, divorcee) {
       active_user.is_paired = false;
       unactive_user.save();
       active_user.save();
-
-      client.messages.create({
-        to: unactive_user.number,
-        from: constants.from_phone,
-        body: 'You have left the chat pool.'
-      });
+      if (unactive_user.is_active) {
+        client.messages.create({
+          to: unactive_user.number,
+          from: constants.from_phone,
+          body: 'Rematching...'
+        }), function(err, message){
+          if (err) {
+            console.log(('[SMS] Error sending message: ' + err).red);
+          }
+        });
+      } else {
+        client.messages.create({
+          to: unactive_user.number,
+          from: constants.from_phone,
+          body: 'You have left the chat pool.'
+        }), function(err, message){
+          if (err) {
+            console.log(('[SMS] Error sending message: ' + err).red);
+          }
+        });
+      }
       client.messages.create({
         to: active_user.number,
         from: constants.from_phone,
         body: 'The other person has diconnected...\nMatching...'
+      }), function(err, message){
+        if (err) {
+          console.log(('[SMS] Error sending message: ' + err).red);
+        }
       });
       res.status(200).end();
     } else {

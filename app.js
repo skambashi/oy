@@ -52,35 +52,6 @@ app.post(
   }
 );
 
-
-
-/*
-app.post('/sms', function(req, res){
-    var from = req.body.From;
-    var body = req.body.Body;
-    console.log('[SMS] From:'.green, from.yellow, 'Body:'.green, body.yellow);
-    if (/^pce$/i.test(body)){
-		db.terminateUser(from);
-        console.log('[SMS]'.green, from.yellow, 'Stopped.'.red);
-    } else {
-		console.log('getPairNumber:', from);
-        db.getPairNumber(from, function (result) {
-		    if (result) {
-	            client.messages.create({
-		            body: body,
-		            to: result,
-		            from: constants.from_phone
-		        }, function(err, message){
-		            if (err) {
-		                console.log('[ERR]'.red, err.red);
-		            }
-		        });
-		    }
-		});
-    }
-});
-*/
-
 // App
 console.log('[SERVER]'.blue, 'Creating server on port'.green,  port.toString().yellow);
 app.listen(port);
