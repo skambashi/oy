@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var debug = require('./../helpers/debug');
 
 var Message = mongoose.model('Message', {
   to: String,
