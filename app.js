@@ -1,4 +1,5 @@
 // Setup
+var debug = require('./helpers/debug');
 var express = require('express');
 var colors = require('colors');
 var mongoose = require('mongoose');
@@ -13,6 +14,7 @@ app.use(parser.urlencoded({ extended: false }));
 mongoose.connect('mongodb://localhost/oy');
 
 // Models
+var Messages = require('./models/messages.js');
 var Users = require('./models/user.js');
 var Pairs = require('./models/pair.js');
 
@@ -26,25 +28,35 @@ app.post(
     var body = req.body.Body;
 
     if(/^pce$/i.test(body) || /^nahh$/i.test(body)) {
-      console.log('[SMS]'.blue, 'Received command:'.green, body.yellow, 'From:'.green, from.yellow);
+      debug.print(
+        debug.type.info,
+        'SMS',
+        from.yellow + ' sent the command: '.green + body.yellow
+      );
+
       Pairs.delete_pair(req,res);
     } else {
       next();
     }
   },
   function(req, res) {
-    var from = req.body.From;
-    var body = req.body.Body;
     var to = req.body.To;
+    var from = req.body.From;
+    var message = req.body.Body;
 
-    console.log('[SMS]'.blue, 'From:'.green, from.yellow, 'Body:'.green, body.yellow, 'To:'.green, to.yellow);
+    Messages.add_message(to, from, message);
+
     client.messages.create({
       body: body,
       to: to,
       from: constants.from_phone
     }, function(err, message){
       if (err) {
-        console.log(('[SMS] Error sending message: ' + err).red)
+        debug.print(
+          debug.type.error,
+          'SMS',
+          'Error sending message: ' + err
+        );
       }
     });
 
@@ -53,5 +65,9 @@ app.post(
 );
 
 // App
-console.log('[SERVER]'.blue, 'Creating server on port'.green,  port.toString().yellow);
+debug.print(
+  debug.type.info,
+  'SERVER',
+  'Creating server on port '.green + port.toString().yellow
+);
 app.listen(port);
