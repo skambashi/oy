@@ -115,7 +115,7 @@ exports.delete_pair = function(req, res) {
         debug.print(
           debug.type.info,
           'PAIR',
-          'Successfully deleted pair with numbers: ' + req.body.From.yellow + ' and ' + divorcee + '.'
+          'Successfully deleted pair with numbers: ' + req.body.From.yellow + ' and '.green + divorcee.yellow + '.'.green
         );
 
         Users.divorce_user(req, res, divorcee);
